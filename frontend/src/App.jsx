@@ -238,7 +238,7 @@ function ProfileDropdown({ userName, onLogout }) {
   }, [])
 
   return (
-    <div ref={dropdownRef} className="relative z-50">
+    <div ref={dropdownRef} className="relative flex justify-end">
 
       <button
         onClick={() => setOpen(!open)}
