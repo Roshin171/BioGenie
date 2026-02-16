@@ -1,92 +1,214 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabase'; // Your existing Supabase client
+import { supabase } from '../supabase';
 
 export default function BiotechSimulations() {
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedTextbook, setSelectedTextbook] = useState(null);
   const [activeLab, setActiveLab] = useState(null);
   const [currentStep, setCurrentStep] = useState('theory');
   const [videoUrl, setVideoUrl] = useState(null);
   const [loadingVideo, setLoadingVideo] = useState(false);
 
-  // Class-wise data
-  const classData = {
-    'class-9': { title: 'Class 9 - Science', textbooks: [{ id: 'science-9', title: 'NCERT Science Textbook' }] },
-    'class-10': { title: 'Class 10 - Science', textbooks: [{ id: 'science-10', title: 'NCERT Science Textbook' }] },
-    'class-11': { title: 'Class 11 - Biology', textbooks: [{ id: 'biology-11', title: 'NCERT Biology Textbook' }] },
-    'class-12': { title: 'Class 12 - Biology', textbooks: [{ id: 'biology-12', title: 'NCERT Biology Textbook' }] }
-  };
-
-  // Lab experiments per textbook
-  const labExperiments = {
-    'science-9': [
+  // Class-wise experiments (NO textbooks)
+  const classExperiments = {
+    'class-9': [
       { id: 'onion-peel', title: 'Onion Peel Cell Observation', type: 'microscopy' },
       { id: 'plant-cells', title: 'Plant Cell Structure Study', type: 'microscopy' }
     ],
-    'science-10': [
+    'class-10': [
       { id: 'stomata', title: 'Stomatal Observation', type: 'microscopy' },
       { id: 'food-test', title: 'Food Test Experiments', type: 'chemical' }
     ],
-    'biology-11': [
+    'class-11': [
       { id: 'mitosis', title: 'Mitosis Cell Division', type: 'microscopy' },
       { id: 'dna-extract', title: 'DNA Extraction from Onion', type: 'molecular' }
     ],
-    'biology-12': [
+    'class-12': [
       { id: 'pcr', title: 'PCR Simulation', type: 'molecular' },
       { id: 'gel-electro', title: 'Gel Electrophoresis', type: 'molecular' }
     ]
   };
 
-  // Lab simulation data
+  // Class data
+  const classData = {
+    'class-9': { title: 'Class 9 - Science', color: 'from-orange-500 to-orange-600' },
+    'class-10': { title: 'Class 10 - Science', color: 'from-blue-500 to-blue-600' },
+    'class-11': { title: 'Class 11 - Biology', color: 'from-purple-500 to-purple-600' },
+    'class-12': { title: 'Class 12 - Biology', color: 'from-emerald-500 to-emerald-600' }
+  };
+
+  // COMPLETE LAB DETAILS - ALL 8 EXPERIMENTS
   const labDetails = {
     'onion-peel': {
       name: 'Onion Peel Cell Observation',
-      theory: 'This experiment is performed to study the basic structure of a plant cell using the epidermal peel of an onion bulb. Onion peel is ideal for observation because its cells are large, rectangular, and arranged in a regular pattern. When stained with iodine solution, important cell components such as the cell wall, cytoplasm, nucleus, and vacuole become clearly visible under a compound microscope.',
+      theory: 'The onion epidermal peel experiment is a fundamental microscopy technique used to study plant cell structure. Onion epidermal cells are ideal for observation because they are large, rectangular in shape, and arranged in a regular brick-like pattern. These cells lack chloroplasts, making the internal structures clearly visible. Key observations include cell wall, cytoplasm, nucleus, and large central vacuole. Iodine solution stains the nucleus brown-purple due to its affinity for chromatin.',
       procedure: [
-        'Take a fresh onion bulb and cut it into layers.',
-        'Using forceps, gently peel off a thin, transparent epidermal layer from the inner surface.',
-        'Place the peel carefully on a clean glass slide.',
-        'Add a few drops of iodine solution to stain the cells.',
-        'Gently place a coverslip over the peel, avoiding air bubbles.',
-        'Observe the slide under low power and then high power of the microscope.'
+        'Select a fresh, firm onion bulb and remove the dry outer layers',
+        'Using forceps, carefully peel a thin, transparent epidermal layer from the inner fleshy scales',
+        'Transfer the peel to a watch glass containing distilled water using forceps',
+        'Cut the peel to 1cm2 size and transfer to a clean glass slide using a brush',
+        'Add 2-3 drops of iodine solution to stain the cells and wait 2-3 minutes',
+        'Remove excess stain with a dropper, add glycerine drop, then gently lower coverslip at 45 degree angle',
+        'Observe first under low power 10X, then switch to high power 40X objective'
       ],
-      guide: 'Ensure the peel is very thin for better clarity. Handle the peel gently with forceps to avoid tearing. While placing the coverslip, lower it slowly at an angle to prevent air bubbles. Clean the slide and coverslip properly before use for clear observation.'
+      guide: 'CRITICAL TIPS: Use only inner fleshy layers. Peel must be extremely thin. Lower coverslip slowly at 45 degree angle to prevent air bubbles. Use fresh iodine solution. Wipe slide edges clean before observation.',
+      viva: [
+        { q: 'What is the shape of onion epidermal cells?', a: 'Rectangular/brick-shaped' },
+        { q: 'Why is iodine used as a stain?', a: 'Stains nucleus chromatin brown-purple' },
+        { q: 'Name 4 cell organelles visible in this preparation', a: 'Cell wall, cytoplasm, nucleus, vacuole' },
+        { q: 'Why onion peel and not leaf peel?', a: 'No chloroplasts, thin transparent epidermis' },
+        { q: 'What would happen if coverslip had air bubbles?', a: 'Dark circular artifacts obscure view' }
+      ]
+    },
+    'plant-cells': {
+      name: 'Plant Cell Structure Study',
+      theory: 'Plant cells exhibit distinct structural features that differentiate them from animal cells. This experiment uses peels from different plant parts to observe variations in cell structure. Epidermal peels reveal cell wall rigidity, while cheek cells serve as comparison. Key plant cell features: Cell wall provides shape/rigidity, large central vacuole 80-90 percent cell volume, plastids chloroplasts in green tissues, plasmodesmata cell-cell connections.',
+      procedure: [
+        'Prepare peels from onion non-green, tradescantia leaf green, and human cheek',
+        'Follow same staining procedure as onion peel for all samples',
+        'Mount each on separate slides with proper labeling',
+        'Observe under microscope and draw labeled diagrams',
+        'Compare plant vs animal cell features systematically'
+      ],
+      guide: 'COMPARISON TABLE: Feature Plant Cell Animal Cell - Cell Wall Present Absent - Shape Fixed Round/Irregular - Vacuole Large central Small/multiple - Plastids Present Absent.',
+      viva: [
+        { q: 'Name the non-living rigid layer outside cell membrane', a: 'Cell wall' },
+        { q: 'What gives green color to leaf cells?', a: 'Chloroplasts' },
+        { q: 'Which cell organelle occupies 90 percent of plant cell volume?', a: 'Central vacuole' },
+        { q: 'Why animal cells lack cell wall?', a: 'Need flexibility for movement' },
+        { q: 'What stains cytoplasm in plant cells?', a: 'Iodine solution' }
+      ]
+    },
+    'stomata': {
+      name: 'Stomatal Observation',
+      theory: 'Stomata are specialized epidermal structures for gas exchange and transpiration control. Each stoma consists of two bean-shaped guard cells that regulate opening/closing via turgor pressure changes. Located primarily on leaf undersurface, stomatal density varies 100-1000 per mm2. Guard cells contain chloroplasts and regulate CO2 intake for photosynthesis while minimizing water loss.',
+      procedure: [
+        'Select healthy dicot leaf hibiscus/tradescantia, peel lower epidermis',
+        'Stain with safranin red or iodine solution',
+        'Mount on slide, observe under high power 40X',
+        'Count stomata in 1mm2 area for density calculation',
+        'Draw labeled diagram showing guard cells and subsidiary cells'
+      ],
+      guide: 'IDENTIFICATION: Guard cells Bean-shaped chloroplast-rich, Stoma Pore between guard cells.',
+      viva: [
+        { q: 'What controls stomatal opening/closing?', a: 'Turgor pressure in guard cells' },
+        { q: 'Why stomata mostly on leaf underside?', a: 'Reduces water loss less sunlight' },
+        { q: 'Name hormone that closes stomata during stress', a: 'Abscisic acid ABA' },
+        { q: 'Function of chloroplasts in guard cells?', a: 'Produce sugars osmotic influx opening' },
+        { q: 'What is stomatal index?', a: 'Percentage of stomata to total epidermal cells' }
+      ]
+    },
+    'food-test': {
+      name: 'Food Test Experiments',
+      theory: 'Biochemical tests identify major biomolecules using specific color reactions. Benedict\'s test detects reducing sugars green/yellow/red precipitate. Biuret test detects proteins violet color. Iodine test detects starch blue-black complex. Sudan III detects lipids red stain in oily layer.',
+      procedure: [
+        'Prepare food samples potato, milk, sugar solution, egg white',
+        'Test each for starch iodine, reducing sugar Benedict, protein Biuret, lipid Sudan III',
+        'Record color changes and positive/negative results',
+        'Prepare control samples pure glucose, albumin for comparison'
+      ],
+      guide: 'COLOR CHART: Starch + Iodine = Blue-black, Reducing sugar + Benedict = Green-Yellow-Red ppt, Protein + Biuret = Violet, Lipid + Sudan III = Red oily layer.',
+      viva: [
+        { q: 'Which test gives blue-black color?', a: 'Starch + Iodine test' },
+        { q: 'Benedict test detects what type of sugar?', a: 'Reducing sugars glucose, fructose' },
+        { q: 'Biuret reagent contains what ions?', a: 'Cu2+ in alkaline medium' },
+        { q: 'Why Sudan III is used for fats?', a: 'Fat soluble red dye' },
+        { q: 'What is negative control in food tests?', a: 'Sample known to lack that biomolecule' }
+      ]
     },
     'mitosis': {
       name: 'Mitosis Cell Division',
-      theory: 'This experiment aims to study the different stages of mitosis using the actively dividing cells of an onion root tip. Mitosis is a type of cell division responsible for growth, repair, and maintenance in multicellular organisms. Onion root tips are used because they contain meristematic tissue where cells divide rapidly, allowing clear observation of stages such as prophase, metaphase, anaphase, and telophase.',
+      theory: 'Mitosis produces identical daughter cells for growth/repair. Onion root tip meristematic cells divide rapidly every 12-24 hours, ideal for observing all stages. Carnoy\'s fixative preserves chromosome structure while acetocarmine staining enhances chromatin visibility.',
       procedure: [
-        'Cut 1–2 cm long onion root tips from a healthy onion.',
-        'Fix the root tips in a suitable fixative to preserve cell structure.',
-        'Hydrolyze the root tips using dilute hydrochloric acid to soften tissues.',
-        'Wash the root tips and stain them with acetocarmine or aceto-orcein.',
-        'Place the stained root tip on a slide and gently squash it using a coverslip.',
-        'Observe the slide under a microscope to identify different stages of mitosis.'
+        'Grow onion in water 4-5 days, collect 1-2cm root tips',
+        'Fix in Carnoy\'s solution 3:1 ethanol:acetic acid for 24hrs',
+        'Hydrolyze in 1N HCl at 60C for 5-10 mins',
+        'Stain with 1 percent acetocarmine at 60C for 20-30 mins',
+        'Squash gently between slide and coverslip',
+        'Observe stages under 40X objective, count 100 cells'
       ],
-      guide: 'Use fresh root tips for maximum mitotic activity. Do not over-hydrolyze as it may damage the cells. Apply gentle pressure while squashing to spread the cells evenly without breaking them. Adjust the microscope focus carefully to distinguish each mitotic stage clearly.'
+      guide: 'MITOTIC INDEX: MI = Dividing cells / Total cells x 100.',
+      viva: [
+        { q: 'Which onion tissue shows maximum mitosis?', a: 'Root tip meristem' },
+        { q: 'Purpose of HCl hydrolysis?', a: 'Softens middle lamella' },
+        { q: 'Acetocarmine stains what?', a: 'DNA/chromatin red' },
+        { q: 'Which stage has chromosomes at equator?', a: 'Metaphase' },
+        { q: 'What is mitotic index?', a: 'Percentage of dividing cells in population' }
+      ]
+    },
+    'dna-extract': {
+      name: 'DNA Extraction from Onion',
+      theory: 'DNA extraction disrupts cell/tissue barriers to release nucleic acids. Onion cells lack lignified walls, making mechanical lysis easier. Detergent dissolves lipid membranes, salt neutralizes DNA phosphates precipitation, cold ethanol dehydrates and precipitates DNA strands.',
+      procedure: [
+        'Chop 2g onion, blend with 20ml extraction buffer detergent + salt',
+        'Filter through muslin cloth remove debris',
+        'Add equal volume ice-cold ethanol to filtrate',
+        'DNA precipitates as white strands at interface',
+        'Spool DNA using glass rod, transfer to microtube'
+      ],
+      guide: 'Use ice-cold ethanol for maximum DNA precipitation.',
+      viva: [
+        { q: 'Role of detergent in DNA extraction?', a: 'Dissolves cell/lipid membranes' },
+        { q: 'Why use ice-cold ethanol?', a: 'Maximizes DNA precipitation' },
+        { q: 'Function of salt/NaCl?', a: 'Neutralizes DNA negative charges' },
+        { q: 'Why onion preferred?', a: 'Soft tissue, high DNA content' },
+        { q: 'What does DNA look like after precipitation?', a: 'White cotton-like strands' }
+      ]
+    },
+    'pcr': {
+      name: 'PCR Simulation',
+      theory: 'Polymerase Chain Reaction PCR amplifies specific DNA segments exponentially. Thermal cycling: Denaturation 95C, Annealing 55C, Extension 72C. Taq polymerase heat-stable extends primers every cycle.',
+      procedure: [
+        'Prepare reaction mix: Template DNA, primers, dNTPs, Taq polymerase, buffer',
+        'Load into thermal cycler with positive/negative controls',
+        'Program: 95C/5min - 95C/30s, 55C/30s, 72C/1min x30 - 72C/5min',
+        'Analyze products via gel electrophoresis',
+        'Visualize bands under UV transilluminator'
+      ],
+      guide: 'PCR success depends on optimal MgCl2 concentration.',
+      viva: [
+        { q: 'What does PCR stand for?', a: 'Polymerase Chain Reaction' },
+        { q: 'Why Taq polymerase used?', a: 'Thermostable survives 95C' },
+        { q: 'Purpose of annealing step?', a: 'Primer binding to template' },
+        { q: 'How many copies after 30 cycles?', a: '~1 billion 2^30' },
+        { q: 'What is denaturation temperature?', a: '95C - separates DNA strands' }
+      ]
+    },
+    'gel-electro': {
+      name: 'Gel Electrophoresis',
+      theory: 'Agarose gel electrophoresis separates DNA fragments by size through porous matrix under electric field. DNA negative charge migrates toward anode. Smaller fragments move faster through gel pores.',
+      procedure: [
+        'Prepare 1 percent agarose gel in TAE buffer + EtBr',
+        'Pour gel, set comb, solidify 30min',
+        'Load: Ladder + samples + loading dye',
+        'Run at 80V for 45-60min',
+        'Visualize under UV transilluminator'
+      ],
+      guide: '1 percent agarose best for 0.5-10kb fragments.',
+      viva: [
+        { q: 'Why DNA moves toward red electrode?', a: 'DNA negatively charged PO4 groups' },
+        { q: 'Smaller fragments move faster because?', a: 'Easier through agarose pores' },
+        { q: 'Purpose of loading dye?', a: 'Density + tracking dye bromophenol blue' },
+        { q: 'Why gel percentage affects resolution?', a: 'Pore size inversely proportional' },
+        { q: 'What stains DNA in gel?', a: 'Ethidium bromide' }
+      ]
     }
   };
 
-  // ✅ SUPABASE VIDEO PLAYER (REPLACES Canvas)
+  // SUPABASE VIDEO PLAYER
   const LabSimulation = ({ labId }) => {
     useEffect(() => {
-      // Fetch video from Supabase Storage
       setLoadingVideo(true);
       const { data } = supabase.storage
-        .from('lab-videos') // Your bucket name
-        .getPublicUrl(`${labId}.mp4`); // onion-peel.mp4, mitosis.mp4, etc.
-      
+        .from('lab-videos')
+        .getPublicUrl(`${labId}.mp4`);
       setVideoUrl(data.publicUrl);
       setLoadingVideo(false);
     }, [labId]);
 
-    const reloadVideo = () => {
-      window.location.reload();
-    };
+    const reloadVideo = () => window.location.reload();
 
     return (
       <div className="space-y-6">
-        {/* SUPABASE VIDEO PLAYER */}
         <div className="aspect-video bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-3xl overflow-hidden shadow-2xl relative">
           {loadingVideo ? (
             <div className="flex items-center justify-center h-full bg-gray-900 text-white">
@@ -94,283 +216,200 @@ export default function BiotechSimulations() {
               Loading {labId}.mp4...
             </div>
           ) : videoUrl ? (
-            <video 
-              controls 
-              autoPlay 
-              className="w-full h-full"
-              poster="https://via.placeholder.com/1280x720/10b981/ffffff?text=SIMULATION"
-            >
+            <video controls autoPlay className="w-full h-full">
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support video playback.
             </video>
           ) : (
             <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white text-center p-8">
-              <div className="text-2xl mb-4">📹 Video Not Found</div>
+              <div className="text-2xl mb-4">Video Not Found</div>
               <div className="text-gray-400 mb-6">{labId}.mp4</div>
-              <button 
-                onClick={reloadVideo}
-                className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
-              >
-                🔄 Retry
+              <button onClick={reloadVideo} className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600">
+                Retry
               </button>
             </div>
           )}
-        </div>
-        
-        {/* VIDEO CONTROLS - SAME DESIGN */}
-        <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border flex items-center justify-between">
-          <div>
-            <h4 className="font-bold text-xl text-gray-800 mb-1">{labDetails[labId]?.name}</h4>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold">
-                SUPABASE • MP4 • HD
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="w-20 bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full w-[70%] animate-pulse" />
-                </div>
-                <span>1:58 / 2:45</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button className="px-5 py-2.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-xl font-semibold hover:from-gray-500 hover:to-gray-600 shadow-md transition-all">
-              ⏸️ Pause
-            </button>
-            <button onClick={reloadVideo} className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold shadow-lg hover:from-emerald-600 hover:to-teal-600 transition-all">
-              🔄 Reload Video
-            </button>
-          </div>
         </div>
       </div>
     );
   };
 
-  // ✅ REST OF YOUR CODE - EXACTLY SAME
+  // MAIN UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* HEADER */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            🧪 Virtual Lab Collection
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">
+            🧪 NCERT Virtual Labs
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            NCERT Aligned Virtual Labs - Class 9 to 12
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Biotechnology Experiments - Class 9 to 12
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* LEFT PANE: Class Selector */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl border sticky top-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                📚 Select Class
-              </h3>
-              {Object.entries(classData).map(([clsId, clsData]) => (
-                <button
-                  key={clsId}
-                  onClick={() => {
-                    setSelectedClass(clsId);
-                    setSelectedTextbook(null);
-                    setActiveLab(null);
-                  }}
-                  className={`w-full p-6 rounded-2xl border-3 shadow-lg hover:shadow-2xl transition-all flex items-center gap-4 text-left group ${
-                    selectedClass === clsId
-                      ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-emerald-300'
-                      : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50'
-                  }`}
+        {/* CLASS SELECTION */}
+        {!selectedClass && !activeLab && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            {Object.entries(classData).map(([classId, data]) => (
+              <div 
+                key={classId}
+                className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-2 border-4 border-transparent hover:border-emerald-300" 
+                onClick={() => setSelectedClass(classId)}
+              >
+                <div className={`w-24 h-24 ${data.color} rounded-3xl mx-auto mb-8 flex items-center justify-center group-hover:scale-110 transition-all shadow-2xl`}>
+                  <span className="text-3xl font-black text-white drop-shadow-lg">{classId.replace('class-', '')}</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 text-center mb-4 group-hover:text-emerald-600 transition-colors">
+                  {data.title}
+                </h3>
+                <div className="text-emerald-600 font-bold text-lg text-center">
+                  {classExperiments[classId].length} Experiments
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* CLASS EXPERIMENTS - NO BOOKS PAGE */}
+        {selectedClass && !activeLab && (
+          <div>
+            <button 
+              onClick={() => setSelectedClass(null)} 
+              className="mb-12 px-8 py-3 bg-white text-emerald-600 rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center gap-3 mx-auto text-lg font-semibold border-2 border-emerald-200 hover:bg-emerald-50"
+            >
+              ← Back to Class Selection
+            </button>
+            
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                {classData[selectedClass].title}
+              </h2>
+              <div className="text-2xl text-emerald-600 font-bold">
+                {classExperiments[selectedClass].length} Experiments
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {classExperiments[selectedClass].map((lab) => (
+                <div 
+                  key={lab.id}
+                  className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-3 border-2 border-transparent hover:border-emerald-200" 
+                  onClick={() => setActiveLab(lab.id)}
                 >
-                  <div className={`w-3 h-3 rounded-full transition-all ${selectedClass === clsId ? 'bg-emerald-500 scale-125' : 'bg-gray-300'}`} />
-                  <div>
-                    <div className="font-bold text-lg text-gray-800 group-hover:text-emerald-700">
-                      {clsData.title}
-                    </div>
-                    <div className="text-sm text-gray-600">8+ Experiments</div>
+                  <div className={`w-28 h-28 ${classData[selectedClass].color} rounded-3xl mx-auto mb-8 flex items-center justify-center group-hover:scale-110 transition-all shadow-2xl`}>
+                    🔬
                   </div>
-                </button>
+                  <h3 className="text-2xl font-bold text-gray-800 text-center mb-6 group-hover:text-emerald-600 transition-colors line-clamp-2 px-4">
+                    {lab.title}
+                  </h3>
+                  <div className="text-emerald-600 font-bold text-xl text-center">
+                    {lab.type.toUpperCase()}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
+        )}
 
-          {/* RIGHT PANE */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Level 1: Textbook Selection */}
-            {selectedClass && !selectedTextbook && !activeLab && (
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl border">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                  📖 {classData[selectedClass].title} - Textbooks
-                </h3>
-                {classData[selectedClass].textbooks.map((textbook) => (
-                  <div
-                    key={textbook.id}
-                    className="group cursor-pointer p-6 rounded-2xl bg-gradient-to-br from-white/50 hover:from-emerald-50 border border-white/30 hover:border-emerald-200 hover:shadow-xl transition-all"
-                    onClick={() => {
-                      setSelectedTextbook(textbook);
-                      setActiveLab(null);
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-xl text-gray-800 mb-1">{textbook.title}</h4>
-                      </div>
-                      <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-200 transition-all">
-                        →
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Level 2: Lab Experiments - FIXED LINE 335 */}
-            {selectedTextbook && !activeLab && (
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl border">
-                <div className="flex items-center gap-4 mb-8">
-                  <button
-                    onClick={() => {
-                      setSelectedTextbook(null);
-                      setActiveLab(null);
-                    }}
-                    className="p-2 bg-white/50 hover:bg-white rounded-xl shadow-md transition-all flex items-center gap-2"
-                  >
-                    ← All Textbooks
-                  </button>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    🧪 Lab Experiments - {selectedTextbook.title}
-                  </h3>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {labExperiments[selectedTextbook.id]?.map((lab) => (
-                    <div
-                      key={lab.id}
-                      className="group cursor-pointer p-8 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-100 hover:shadow-2xl hover:-translate-y-2 transition-all hover:border-emerald-300"
-                      onClick={() => {
-                        setActiveLab(lab);
-                        setCurrentStep('theory');
-                      }}
-                    >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className={`px-4 py-2 rounded-xl text-xs font-bold ${
-                          lab.type === 'microscopy' ? 'bg-blue-100 text-blue-800' :
-                          lab.type === 'molecular' ? 'bg-purple-100 text-purple-800' :
-                          'bg-emerald-100 text-emerald-800'
-                        }`}>
-                          {lab.type.toUpperCase()}
-                        </div>
-                      </div>
-                      <h4 className="font-bold text-xl text-gray-800 mb-3">{lab.title}</h4>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <div className="w-20 bg-white px-3 py-1 rounded-full text-xs font-semibold text-emerald-700">
-                          Simulation
-                        </div>
-                        <div className="w-20 bg-white px-3 py-1 rounded-full text-xs font-semibold text-blue-700">
-                          Guide
-                        </div>
-                      </div>
-                    </div>
-                  )) || <p className="col-span-full text-center py-12 text-gray-500">No labs available</p>}
-                </div>
-              </div>
-            )}
-
-            {/* Level 3: Lab Simulation */}
-            {activeLab && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border">
-                <div className="flex items-center gap-4 mb-8">
-                  <button
-                    onClick={() => setActiveLab(null)}
-                    className="p-3 bg-emerald-100 hover:bg-emerald-200 rounded-2xl shadow-md transition-all flex items-center gap-2 text-emerald-800 font-semibold"
-                  >
-                    ← Lab Experiments
-                  </button>
-                  <div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">
-                      {activeLab.title}
-                    </h2>
-                    <div className={`px-4 py-2 rounded-full text-sm font-bold mt-1 ${
-                      activeLab.type === 'microscopy' ? 'bg-blue-100 text-blue-800' :
-                      activeLab.type === 'molecular' ? 'bg-purple-100 text-purple-800' :
-                      'bg-emerald-100 text-emerald-800'
-                    }`}>
-                      {activeLab.type.toUpperCase()} LAB
-                    </div>
-                  </div>
-                </div>
-
-                {/* 5-tab Navigation */}
-                <div className="flex bg-gradient-to-r from-gray-50 to-emerald-50 rounded-2xl p-1 mb-8 shadow-sm">
-                  {['theory', 'procedure', 'simulation', 'guide', 'viva'].map((step) => (
+        {/* ACTIVE LAB CONTENT */}
+        {activeLab && (
+          <div>
+            <button 
+              onClick={() => setActiveLab(null)} 
+              className="mb-12 px-8 py-3 bg-white text-emerald-600 rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center gap-3 mx-auto text-lg font-semibold border-2 border-emerald-200 hover:bg-emerald-50"
+            >
+              ← Back to Experiments
+            </button>
+            
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+              {/* TABS */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-1">
+                <div className="flex bg-white rounded-2xl overflow-hidden">
+                  {['theory', 'procedure', 'guide', 'viva', 'simulation'].map((step) => (
                     <button
                       key={step}
                       onClick={() => setCurrentStep(step)}
-                      className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                      className={`flex-1 py-4 px-6 font-semibold transition-all ${
                         currentStep === step
-                          ? 'bg-white shadow-lg text-emerald-700 border-2 border-emerald-200'
-                          : 'text-gray-600 hover:text-emerald-600 hover:bg-white'
+                          ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
+                          : 'text-gray-600 hover:text-emerald-600 hover:bg-gray-50'
                       }`}
                     >
                       {step === 'theory' && '📖 Theory'}
-                      {step === 'procedure' && '📋 Procedure'}
-                      {step === 'simulation' && '🧪 Simulation'}
-                      {step === 'guide' && '📖 Guide'}
+                      {step === 'procedure' && '🧪 Procedure'}
+                      {step === 'guide' && '💡 Guide'}
                       {step === 'viva' && '❓ Viva'}
+                      {step === 'simulation' && '🎥 Simulation'}
                     </button>
                   ))}
                 </div>
-
-                {/* Tab Content */}
-                <div className="min-h-[400px]">
-                  {currentStep === 'theory' && (
-                    <div className="p-10 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl text-lg text-gray-800">
-                      {labDetails[activeLab.id]?.theory || 'Theory content will appear here...'}
-                    </div>
-                  )}
-                  {currentStep === 'procedure' && (
-                    <div className="p-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl text-lg text-gray-800">
-                      <div className="space-y-4">
-                        <h3 className="text-2xl font-bold text-blue-800 mb-4">Procedure Steps</h3>
-                        {Array.isArray(labDetails[activeLab.id]?.procedure) ? (
-                          labDetails[activeLab.id].procedure.map((step, index) => (
-                            <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-xl shadow-sm border-l-4 border-blue-400">
-                              <span className="font-bold text-blue-600 w-8 flex-shrink-0">{index + 1}.</span>
-                              <span>{step}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <p>Procedure content will appear here...</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {currentStep === 'simulation' && (
-                    <LabSimulation labId={activeLab.id} />
-                  )}
-                  {currentStep === 'guide' && (
-                    <div className="p-10 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl text-lg text-gray-800">
-                      {labDetails[activeLab.id]?.guide || 'Experiment guide will appear here...'}
-                    </div>
-                  )}
-                  {currentStep === 'viva' && (
-                    <div className="p-10 bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl text-lg text-gray-800">
-                      <h3 className="text-2xl font-bold text-orange-800 mb-6">Viva Voce Questions</h3>
-                      <ul className="space-y-3">
-                        <li className="p-4 bg-white rounded-xl shadow-sm border-l-4 border-orange-400">
-                          <strong>Q: What is the shape of onion peel cells?</strong><br/>
-                          <span className="text-sm text-gray-600 ml-4">A: Rectangular</span>
-                        </li>
-                        <li className="p-4 bg-white rounded-xl shadow-sm border-l-4 border-orange-400">
-                          <strong>Q: What stain is used?</strong><br/>
-                          <span className="text-sm text-gray-600 ml-4">A: Iodine solution</span>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
               </div>
-            )}
+
+              {/* TAB CONTENT */}
+              <div className="p-12">
+                {currentStep === 'theory' && (
+                  <div className="prose prose-lg max-w-none">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6">{labDetails[activeLab]?.name}</h2>
+                    <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">{labDetails[activeLab]?.theory}</p>
+                  </div>
+                )}
+
+                {currentStep === 'procedure' && (
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-8">{labDetails[activeLab]?.name} - Procedure</h2>
+                    <div className="space-y-4">
+                      {labDetails[activeLab]?.procedure?.map((step, index) => (
+                        <div key={index} className="flex items-start gap-4 p-6 bg-emerald-50 rounded-2xl border-l-4 border-emerald-400">
+                          <div className="flex-shrink-0 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-sm mt-0.5">
+                            {index + 1}
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'guide' && (
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-8">{labDetails[activeLab]?.name} - Practical Guide</h2>
+                    <div className="prose prose-lg max-w-none">
+                      <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">{labDetails[activeLab]?.guide}</p>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'viva' && (
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-8">{labDetails[activeLab]?.name} - Viva Questions</h2>
+                    <div className="space-y-4">
+                      {labDetails[activeLab]?.viva?.map((item, index) => (
+                        <div key={index} className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                          <div className="flex items-start gap-4 mb-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0">
+                              Q{index + 1}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-800 text-lg">{item.q}</p>
+                              <p className="text-emerald-700 font-semibold mt-2 bg-emerald-50 px-4 py-2 rounded-lg inline-block">
+                                {item.a}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'simulation' && (
+                  <LabSimulation labId={activeLab} />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
