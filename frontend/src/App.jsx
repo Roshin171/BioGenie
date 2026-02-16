@@ -10,18 +10,29 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // ✅ AUTO RESTORE SESSION ON LOAD
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser()
+useEffect(() => {
 
-      if (data?.user) {
-        setIsAuthenticated(true)
-        setUserName(data.user.user_metadata?.full_name || "")
-      }
+  const checkSession = async () => {
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    // If user is logged in normally
+    if (session?.user) {
+      setIsAuthenticated(true)
+      setUserName(session.user.user_metadata?.full_name || "")
     }
 
-    checkUser()
-  }, [])
+    // Detect password recovery session
+    if (session && window.location.hash.includes("type=recovery")) {
+      setPage("updatePassword")
+    }
+
+  }
+
+  checkSession()
+
+}, [])
+
 
   // ✅ LOGOUT
   const handleLogout = async () => {
@@ -52,9 +63,25 @@ function App() {
 
           setPage("roles")
         }}
+        goToReset={() => setPage("reset")} 
       />
     )
   }
+
+  if (page === "reset") {
+  return (
+    <ResetPasswordPage
+      goToLogin={() => setPage("login")}
+    />
+  )
+}
+  if (page === "updatePassword") {
+  return (
+    <UpdatePasswordPage
+      goToLogin={() => setPage("login")}
+    />
+  )
+}
 
   if (page === "roles") {
     return (
@@ -230,58 +257,56 @@ function ProfileDropdown({ userName, onLogout }) {
 
 // ================= AUTH PAGE =================
 
-function AuthPage({ mode, goToLogin, goToSignup, goHome, onSuccess }) {
+function AuthPage({ mode, goToLogin, goToSignup, goHome, onSuccess, goToReset }) {
 
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
 
-
   const handleSubmit = async () => {
 
-  if (!email || !password || (mode === "signup" && !fullName)) {
-    setError("Please fill all fields")
-    return
-  }
+    if (!email || !password || (mode === "signup" && !fullName)) {
+      setError("Please fill all fields")
+      return
+    }
 
-  try {
+    try {
 
-    if (mode === "signup") {
+      if (mode === "signup") {
 
-      const { error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName
+        const { error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              full_name: fullName
+            }
           }
-        }
-      })
+        })
 
-      if (error) throw error
+        if (error) throw error
 
-      alert("Account created successfully! Please login.")
-      goToLogin()
+        alert("Account created successfully! Please login.")
+        goToLogin()
+      }
+
+      if (mode === "login") {
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        })
+
+        if (error) throw error
+
+        onSuccess()
+      }
+
+    } catch (err) {
+      setError(err.message)
     }
-
-    if (mode === "login") {
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      })
-
-      if (error) throw error
-
-      onSuccess()
-    }
-
-  } catch (err) {
-    setError(err.message)
   }
-}
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
@@ -317,10 +342,22 @@ function AuthPage({ mode, goToLogin, goToSignup, goHome, onSuccess }) {
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-3 border rounded-lg mb-6"
+          className="w-full p-3 border rounded-lg mb-2"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        {/* ✅ STEP 3 — Forgot Password Link (Login Only) */}
+        {mode === "login" && (
+          <div className="text-right text-sm mb-4">
+            <span
+              onClick={goToReset}
+              className="text-emerald-600 cursor-pointer hover:underline"
+            >
+              Forgot Password?
+            </span>
+          </div>
+        )}
 
         {error && (
           <p className="text-red-500 text-sm mb-4 text-center">
@@ -352,6 +389,143 @@ function AuthPage({ mode, goToLogin, goToSignup, goHome, onSuccess }) {
             </>
           )}
         </div>
+
+      </div>
+    </div>
+  )
+}
+
+function ResetPasswordPage({ goBack }) {
+
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
+
+  const handleReset = async () => {
+    if (!email) {
+      setError("Please enter your email")
+      return
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:5173"
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setError("")
+      setMessage("Password reset link sent to your email.")
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+
+      <div className="bg-white p-10 rounded-2xl shadow-xl w-[420px]">
+
+        <button onClick={goBack} className="text-sm text-gray-500 mb-4">
+          ← Back to Login
+        </button>
+
+        <h2 className="text-3xl font-bold text-emerald-700 text-center mb-8">
+          Reset Password
+        </h2>
+
+        <input
+          type="email"
+          placeholder="Enter your registered email"
+          className="w-full p-3 border rounded-lg mb-4"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p className="text-green-600 text-sm mb-4 text-center">
+            {message}
+          </p>
+        )}
+
+        <button
+          onClick={handleReset}
+          className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition"
+        >
+          Send Reset Link
+        </button>
+
+      </div>
+    </div>
+  )
+}
+
+function UpdatePasswordPage({ goToLogin }) {
+
+  const [newPassword, setNewPassword] = useState("")
+  const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
+
+  const handleUpdate = async () => {
+    if (!newPassword) {
+      setError("Please enter a new password")
+      return
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setError("")
+      setMessage("Password updated successfully! Please login.")
+      setTimeout(() => {
+        goToLogin()
+      }, 2000)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+
+      <div className="bg-white p-10 rounded-2xl shadow-xl w-[420px]">
+
+        <h2 className="text-3xl font-bold text-emerald-700 text-center mb-8">
+          Set New Password
+        </h2>
+
+        <input
+          type="password"
+          placeholder="Enter new password"
+          className="w-full p-3 border rounded-lg mb-4"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p className="text-green-600 text-sm mb-4 text-center">
+            {message}
+          </p>
+        )}
+
+        <button
+          onClick={handleUpdate}
+          className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition"
+        >
+          Update Password
+        </button>
 
       </div>
     </div>
