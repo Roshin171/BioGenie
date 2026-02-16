@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { supabase } from "./supabase"
 import BiotechSimulations from "./components/BiotechSimulations"
-import VirtualLabs from './components/VirtualLabs'; 
 
 function App() {
 
@@ -654,9 +653,7 @@ function RoleCard({ title, desc, img, onClick }) {
 /* ---------------- Dashboard ---------------- */
 
 function RoleDashboard({ role, onOpen, onBack, isAuthenticated, onLogout, userName }) {
-
   const dashboards = {
-
     student: [
       { title: "PPT Maker", img: "https://cdn-icons-png.flaticon.com/512/888/888879.png" },
       { title: "Notes Generator", img: "https://cdn-icons-png.flaticon.com/512/2921/2921222.png" },
@@ -688,90 +685,82 @@ function RoleDashboard({ role, onOpen, onBack, isAuthenticated, onLogout, userNa
       { title: "News Simplifier", img: "https://cdn-icons-png.flaticon.com/512/2965/2965879.png" }
     ],
 
-    labs: [
-      { title: "Virtual Lab Experiments", img: "https://cdn-icons-png.flaticon.com/512/2784/2784487.png" },
-      { title: "Biotech Simulations", img: "https://cdn-icons-png.flaticon.com/512/4149/4149676.png" },
-      { title: "Step by Step Experiment Guide", img: "https://cdn-icons-png.flaticon.com/512/1828/1828817.png" },
-      { title: "Safety Training", img: "https://cdn-icons-png.flaticon.com/512/2913/2913465.png" },
-      { title: "Lab Viva Preparation", img: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" }
-    ]
+    // ✅ LABS - NO CARDS, EMPTY ARRAY
+    labs: []
+  };
 
+  const items = dashboards[role] || [];
+
+  // ✅ LABS SPECIAL CASE - SHOW BIOTECH SIMULATIONS WITH DASHBOARD HEADER
+  if (role === 'labs') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
+        {/* DASHBOARD HEADER */}
+        <div className="flex items-center gap-4 mb-8 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm">
+          <button
+            onClick={onBack}
+            className="bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
+          >
+            ← Back
+          </button>
+          <h2 className="text-4xl font-bold text-emerald-700">
+            LABS DASHBOARD
+          </h2>
+          {isAuthenticated && (
+            <div className="ml-auto">
+              <ProfileDropdown userName={userName} onLogout={onLogout} />
+            </div>
+          )}
+        </div>
+
+        {/* BIOTECH SIMULATIONS */}
+        <div className="max-w-7xl mx-auto">
+          <BiotechSimulations />
+        </div>
+      </div>
+    );
   }
-
-  const items = dashboards[role] || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-10">
-    <div className="flex items-center gap-4">
-    <button
-      onClick={onBack}
-      className="bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
-    >
-      ← Back
-    </button>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onBack}
+          className="bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
+        >
+          ← Back
+        </button>
+        <h2 className="text-4xl font-bold text-emerald-700">
+          {role?.toUpperCase()} DASHBOARD
+        </h2>
+      </div>
 
-    <h2 className="text-4xl font-bold text-emerald-700">
-      {role?.toUpperCase()} DASHBOARD
-    </h2>
-  </div>
-
-  {isAuthenticated && (
-    <ProfileDropdown
-      userName={userName}
-      onLogout={onLogout}
-    />
-  )}
-      
-
+      {isAuthenticated && (
+        <ProfileDropdown
+          userName={userName}
+          onLogout={onLogout}
+        />
+      )}
 
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-
         {items.map((item, index) => (
           <div
             key={index}
             className="bg-white p-8 rounded-2xl shadow-lg text-center hover:shadow-xl transition flex flex-col items-center"
           >
-
             <img src={item.img} className="w-16 h-16 mb-4" />
-
             <h3 className="text-lg font-semibold text-emerald-700 mb-4">
               {item.title}
             </h3>
-
             <button
               onClick={() => onOpen(item.title)}
-              className="mt-auto bg-emerald-600 text-white px-6 py-2 rounded-lg w-full"
+              className="mt-auto bg-emerald-600 text-white px-6 py-2 rounded-lg w-full hover:bg-emerald-700 transition"
             >
               Open
             </button>
-
           </div>
         ))}
-
       </div>
-
-    </div>
-  )
-}
-
-
-function GemScreen({ role, gem, onBack, isAuthenticated, userName, onLogout }) {
-  // ... existing code ...
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-6 flex flex-col">
-      {/* HEADER */}
-      {/* ... */}
-      
-      {/* CONDITIONAL RENDERING */}
-      {gem === "Biotech Simulations" ? <BiotechSimulations /> : 
-      gem === "Virtual Lab Experiments" ? <VirtualLabs /> : (
-        // chat messages div
-        <div className="flex-1 bg-white rounded-2xl shadow p-4 overflow-y-auto mb-4">
-          {/* ... messages ... */}
-        </div>
-      )}
-      {/* ... input ... */}
     </div>
   );
 }
